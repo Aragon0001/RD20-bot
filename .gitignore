@@ -1,0 +1,9 @@
+node_modules/
+.env
+
+rd20.db
+rd20.db-shm
+rd20.db-wal
+
+ataques.json
+ataques-backup.json

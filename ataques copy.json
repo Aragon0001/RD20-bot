@@ -1,0 +1,14 @@
+{
+    "416709184902660098": {
+        "espada": {
+            "nome": "Espada de Mithril",
+            "ataque": "1d20+5",
+            "dano": "1d12"
+        },
+        "adaga": {
+            "nome": "Adaga",
+            "ataque": "1d20+5",
+            "dano": "1d8"
+        }
+    }
+}
