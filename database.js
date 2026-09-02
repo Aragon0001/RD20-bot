@@ -1,13 +1,49 @@
 const Database = require('better-sqlite3');
 const path = require('path');
+const fs = require('fs');
+
+
+// Caminho do volume da Railway.
+// No PC, usa a pasta local do projeto.
+const pastaBanco =
+    process.env.RAILWAY_VOLUME_MOUNT_PATH ||
+    __dirname;
+
+
+// Garante que a pasta exista
+if (!fs.existsSync(pastaBanco)) {
+
+    fs.mkdirSync(
+        pastaBanco,
+        {
+            recursive: true
+        }
+    );
+
+}
+
 
 const caminhoBanco =
-    process.env.DB_PATH ||
-    path.join(__dirname, 'rd20.db');
+    path.join(
+        pastaBanco,
+        'rd20.db'
+    );
 
-const db = new Database(caminhoBanco);
 
-db.pragma('journal_mode = WAL');
+console.log(
+    `Banco SQLite: ${caminhoBanco}`
+);
+
+
+const db =
+    new Database(
+        caminhoBanco
+    );
+
+
+db.pragma(
+    'journal_mode = WAL'
+);
 
 db.prepare(`
     CREATE TABLE IF NOT EXISTS ataques (
