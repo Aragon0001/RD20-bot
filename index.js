@@ -221,7 +221,8 @@ function formatarDado(
 
 function executarRolagem(
     expressao,
-    modo = 'normal'
+    modo = 'normal',
+    maiorD20Automatico = false
 ) {
 
     const info =
@@ -285,6 +286,21 @@ function executarRolagem(
 
         tipoSelecao =
             'menor';
+
+    }
+
+    // =========================
+    // MAIOR D20 AUTOMÁTICO EM ATAQUES
+    // =========================
+
+    if (
+        maiorD20Automatico &&
+        faces === 20 &&
+        quantidade > 1 &&
+        !info.manter
+    ) {
+
+        tipoSelecao = 'maior';
 
     }
 
@@ -772,7 +788,8 @@ client.on(
                 const ataque =
                     executarRolagem(
                         pendente.ataque,
-                        pendente.modo
+                        pendente.modo,
+                        true
                     );
 
 
