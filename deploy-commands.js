@@ -204,7 +204,7 @@ const commands = [
 // ==================================================
 
 const APPLICATION_ID =
-    'SEU_APPLICATION_ID';
+    '1544531759570485260';
 
 
 const rest =
