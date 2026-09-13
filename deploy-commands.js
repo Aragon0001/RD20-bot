@@ -204,7 +204,7 @@ const commands = [
 // ==================================================
 
 const APPLICATION_ID =
-    '1544531759570485260';
+    process.env.APPLICATION_ID;
 
 
 const rest =
