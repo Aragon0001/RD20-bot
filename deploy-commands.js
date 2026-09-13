@@ -6,112 +6,258 @@ const {
     SlashCommandBuilder
 } = require('discord.js');
 
+
+// ==================================================
+// COMANDOS
+// ==================================================
+
 const commands = [
 
-    // /roll
+
+    // ==================================================
+    // /ROLL
+    // ==================================================
+
     new SlashCommandBuilder()
+
         .setName('roll')
+
         .setDescription('Rola dados de RPG')
+
         .addStringOption(option =>
+
             option
+
                 .setName('expressao')
-                .setDescription('Ex: 1d20, 2d6+3, 2d20 vantagem')
+
+                .setDescription(
+                    'Ex: 1d20, 2d6+3, 2d20 vantagem'
+                )
+
                 .setRequired(true)
+
         ),
 
-    // /salvar-ataque
+
+    // ==================================================
+    // /SALVAR-ATAQUE
+    // ==================================================
+
     new SlashCommandBuilder()
+
         .setName('salvar-ataque')
-        .setDescription('Salva um ataque para usar depois')
+
+        .setDescription(
+            'Salva um ataque para usar depois'
+        )
+
         .addStringOption(option =>
+
             option
+
                 .setName('nome')
-                .setDescription('Nome do ataque ou arma')
+
+                .setDescription(
+                    'Nome do ataque ou arma'
+                )
+
                 .setRequired(true)
+
         )
+
         .addStringOption(option =>
+
             option
+
                 .setName('ataque')
-                .setDescription('Rolagem de ataque. Ex: 1d20+5')
+
+                .setDescription(
+                    'Rolagem de ataque. Ex: 1d20+5 ou 3d20+5'
+                )
+
                 .setRequired(true)
+
         )
+
         .addStringOption(option =>
+
             option
+
                 .setName('dano')
-                .setDescription('Rolagem de dano. Ex: 1d10+3')
+
+                .setDescription(
+                    'Rolagem de dano. Ex: 1d10+3'
+                )
+
                 .setRequired(true)
+
         ),
 
-    // /ataque
+
+    // ==================================================
+    // /ATAQUE
+    // ==================================================
+
     new SlashCommandBuilder()
+
         .setName('ataque')
-        .setDescription('Usa um ataque salvo')
-        .addStringOption(option =>
-            option
-                .setName('nome')
-                .setDescription('Nome do ataque salvo')
-                .setRequired(true)
-                .setAutocomplete(true)
+
+        .setDescription(
+            'Usa um ataque salvo'
         )
+
         .addStringOption(option =>
+
             option
+
+                .setName('nome')
+
+                .setDescription(
+                    'Nome do ataque salvo'
+                )
+
+                .setRequired(true)
+
+                .setAutocomplete(true)
+
+        )
+
+        .addStringOption(option =>
+
+            option
+
                 .setName('modo')
-                .setDescription('Rolagem normal, vantagem ou desvantagem')
+
+                .setDescription(
+                    'Modo da rolagem'
+                )
+
                 .addChoices(
+
                     {
                         name: 'Normal',
                         value: 'normal'
                     },
+
                     {
                         name: 'Vantagem',
                         value: 'vantagem'
                     },
+
                     {
                         name: 'Desvantagem',
                         value: 'desvantagem'
                     }
+
                 )
+
         ),
 
-        // /listar-ataques
+
+    // ==================================================
+    // /LISTAR-ATAQUES
+    // ==================================================
+
     new SlashCommandBuilder()
+
         .setName('listar-ataques')
-        .setDescription('Mostra todos os seus ataques salvos'),
 
-
-    // /remover-ataque
-    new SlashCommandBuilder()
-        .setName('remover-ataque')
-        .setDescription('Remove um ataque salvo')
-        .addStringOption(option =>
-            option
-                .setName('nome')
-                .setDescription('Nome do ataque que deseja remover')
-                .setRequired(true)
-                .setAutocomplete(true)
+        .setDescription(
+            'Mostra todos os seus ataques salvos'
         ),
+
+
+    // ==================================================
+    // /REMOVER-ATAQUE
+    // ==================================================
+
+    new SlashCommandBuilder()
+
+        .setName('remover-ataque')
+
+        .setDescription(
+            'Remove um ataque salvo'
+        )
+
+        .addStringOption(option =>
+
+            option
+
+                .setName('nome')
+
+                .setDescription(
+                    'Nome do ataque que deseja remover'
+                )
+
+                .setRequired(true)
+
+                .setAutocomplete(true)
+
+        )
+
 
 ].map(command => command.toJSON());
 
-const rest = new REST({
-    version: '10'
-}).setToken(process.env.DISCORD_TOKEN);
+
+// ==================================================
+// CONFIGURAÇÃO
+// ==================================================
+
+const APPLICATION_ID =
+    'SEU_APPLICATION_ID';
 
 
-// COLOQUE OS MESMOS IDs QUE VOCÊ JÁ ESTAVA USANDO
-const APPLICATION_ID = '1544531759570485260';
+const rest =
+    new REST({
+        version: '10'
+    })
+    .setToken(
+        process.env.DISCORD_TOKEN
+    );
 
 
-rest.put(
-    Routes.applicationCommands(
-        APPLICATION_ID
-    ),
-    {
-        body: commands
+// ==================================================
+// REGISTRAR COMANDOS GLOBALMENTE
+// ==================================================
+
+(async () => {
+
+    try {
+
+        console.log(
+            'Registrando comandos globais do RD20...'
+        );
+
+
+        await rest.put(
+
+            Routes.applicationCommands(
+                APPLICATION_ID
+            ),
+
+            {
+                body: commands
+            }
+
+        );
+
+
+        console.log(
+            '✅ Comandos globais registrados com sucesso!'
+        );
+
     }
-)
 
-.then(() => {
-    console.log('Comandos atualizados!');
-})
-.catch(console.error);
+    catch (erro) {
+
+        console.error(
+            '❌ Erro ao registrar comandos:'
+        );
+
+        console.error(
+            erro
+        );
+
+    }
+
+})();
