@@ -5,7 +5,8 @@ const {
     GatewayIntentBits,
     ActionRowBuilder,
     ButtonBuilder,
-    ButtonStyle
+    ButtonStyle,
+    MessageFlags
 } = require('discord.js');
 
 const {
@@ -129,6 +130,47 @@ function validarExpressao(info) {
 
 }
 
+// ==================================================
+// CRIAR DANO CRÍTICO
+// ==================================================
+
+function criarDanoCritico(expressao) {
+
+    const info =
+        analisarExpressao(expressao);
+
+
+    if (!info) {
+        return expressao;
+    }
+
+
+    const quantidadeCritica =
+        info.quantidade * 2;
+
+
+    let expressaoCritica =
+        `${quantidadeCritica}d${info.faces}`;
+
+
+    if (info.manter) {
+
+        expressaoCritica +=
+            info.manter;
+
+    }
+
+
+    if (info.modificador !== 0) {
+
+        expressaoCritica +=
+            `${info.modificador > 0 ? '+' : ''}${info.modificador}`;
+
+    }
+
+
+    return expressaoCritica;
+}
 
 // ==================================================
 // ROLAR DADOS
@@ -793,9 +835,25 @@ client.on(
                     );
 
 
+                let expressaoDano =
+                    pendente.dano;
+
+
+                if (
+                    ataque.critico
+                ) {
+
+                    expressaoDano =
+                        criarDanoCritico(
+                            pendente.dano
+                        );
+
+                }
+
+
                 const dano =
                     executarRolagem(
-                        pendente.dano
+                        expressaoDano
                     );
 
 
@@ -887,8 +945,21 @@ client.on(
                 // DANO
                 // ==================================================
 
-                resposta +=
-                    `\n🩸 **Dano — ${pendente.dano.toUpperCase()}**\n`;
+                if (
+                    ataque.critico
+                ) {
+
+                    resposta +=
+                        `\n🔥 **Dano crítico — ${expressaoDano.toUpperCase()}**\n`;
+
+                }
+
+                else {
+
+                    resposta +=
+                        `\n🩸 **Dano — ${expressaoDano.toUpperCase()}**\n`;
+
+                }
 
 
                 if (
@@ -927,20 +998,24 @@ client.on(
                     pendente.idRolar
                 );
 
-
                 ataquesPendentes.delete(
                     pendente.idCancelar
                 );
 
 
+                // Fecha o preview privado
                 await interaction.update({
-
                     content:
-                        resposta,
-
+                        '✅ Rolagem realizada!',
                     components:
                         []
+                });
 
+
+                // Publica o resultado no canal
+                await interaction.followUp({
+                    content:
+                        resposta
                 });
 
 
@@ -1011,9 +1086,11 @@ client.on(
                 erroAtaque
             ) {
 
-                await interaction.reply(
-                    `❌ Ataque inválido.\n${erroAtaque}\nExemplo: \`1d20+5\`.`
-                );
+                await interaction.reply({
+                    content:
+                        `❌ Ataque inválido.\n${erroAtaque}\nExemplo: \`1d20+5\`.`,
+                    flags: MessageFlags.Ephemeral
+                });
 
 
                 return;
@@ -1041,9 +1118,11 @@ client.on(
                 erroDano
             ) {
 
-                await interaction.reply(
-                    `❌ Dano inválido.\n${erroDano}\nExemplo: \`1d10+3\`.`
-                );
+                await interaction.reply({
+                    content:
+                        `❌ Dano inválido.\n${erroDano}\nExemplo: \`1d10+3\`.`,
+                    flags: MessageFlags.Ephemeral
+                });
 
 
                 return;
@@ -1067,15 +1146,13 @@ client.on(
             );
 
 
-            await interaction.reply(
-
-                `✅ **${nome}** foi salvo!\n\n` +
-
-                `🎯 Ataque: \`${ataque}\`\n` +
-
-                `🩸 Dano: \`${dano}\``
-
-            );
+            await interaction.reply({
+                content:
+                    `✅ **${nome}** foi salvo!\n\n` +
+                    `🎯 Ataque: \`${ataque}\`\n` +
+                    `🩸 Dano: \`${dano}\``,
+                flags: MessageFlags.Ephemeral
+            });
 
 
             return;
@@ -1106,9 +1183,11 @@ client.on(
                 ataquesUsuario.length === 0
             ) {
 
-                await interaction.reply(
-                    '📭 Você ainda não possui nenhum ataque salvo.'
-                );
+                await interaction.reply({
+                    content:
+                        '📭 Você ainda não possui nenhum ataque salvo.',
+                    flags: MessageFlags.Ephemeral
+                });
 
 
                 return;
@@ -1146,9 +1225,10 @@ client.on(
             }
 
 
-            await interaction.reply(
-                resposta
-            );
+            await interaction.reply({
+                content: resposta,
+                flags: MessageFlags.Ephemeral
+            });
 
 
             return;
@@ -1186,9 +1266,11 @@ client.on(
                 !ataqueSalvo
             ) {
 
-                await interaction.reply(
-                    `❌ Você não possui um ataque chamado **${nome}**.`
-                );
+                await interaction.reply({
+                    content:
+                        `❌ Você não possui um ataque chamado **${nome}**.`,
+                    flags: MessageFlags.Ephemeral
+                });
 
 
                 return;
@@ -1202,9 +1284,11 @@ client.on(
             );
 
 
-            await interaction.reply(
-                `🗑️ **${ataqueSalvo.nome}** foi removido dos seus ataques.`
-            );
+            await interaction.reply({
+                content:
+                    `🗑️ **${ataqueSalvo.nome}** foi removido dos seus ataques.`,
+                flags: MessageFlags.Ephemeral
+            });
 
 
             return;
@@ -1252,9 +1336,11 @@ client.on(
                 !ataqueSalvo
             ) {
 
-                await interaction.reply(
-                    `❌ Você não possui um ataque chamado **${nome}**.`
-                );
+                await interaction.reply({
+                    content:
+                        `❌ Você não possui um ataque chamado **${nome}**.`,
+                    flags: MessageFlags.Ephemeral
+                });
 
 
                 return;
@@ -1450,13 +1536,9 @@ client.on(
 
 
             await interaction.reply({
-
-                content:
-                    resposta,
-
-                components:
-                    [botoes]
-
+                content: resposta,
+                components: [botoes],
+                flags: MessageFlags.Ephemeral
             });
 
 
