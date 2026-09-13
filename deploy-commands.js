@@ -99,19 +99,18 @@ const rest = new REST({
 
 
 // COLOQUE OS MESMOS IDs QUE VOCÊ JÁ ESTAVA USANDO
-const APPLICATION_ID = 'SEU_APPLICATION_ID';
-const SERVER_ID = 'SEU_SERVER_ID';
+const APPLICATION_ID = '1544531759570485260';
 
 
 rest.put(
-    Routes.applicationGuildCommands(
-         '1544531759570485260', 
-         '1544541486870437890'
+    Routes.applicationCommands(
+        APPLICATION_ID
     ),
     {
         body: commands
     }
 )
+
 .then(() => {
     console.log('Comandos atualizados!');
 })
