@@ -244,7 +244,6 @@ const commands = [
 
         )
 
-        
 
 
 ].map(command => command.toJSON());
