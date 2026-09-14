@@ -667,7 +667,8 @@ client.on(
 
             if (
                 interaction.commandName === 'ataque' ||
-                interaction.commandName === 'remover-ataque'
+                interaction.commandName === 'remover-ataque' ||
+                interaction.commandName === 'editar-ataque'
             ) {
 
                 const usuario =
@@ -1288,6 +1289,259 @@ client.on(
                 content:
                     `🗑️ **${ataqueSalvo.nome}** foi removido dos seus ataques.`,
                 flags: MessageFlags.Ephemeral
+            });
+
+
+            return;
+
+        }
+
+        // ==================================================
+        // /EDITAR-ATAQUE
+        // ==================================================
+
+        if (
+            interaction.commandName ===
+            'editar-ataque'
+        ) {
+
+            const nome =
+                interaction.options
+                    .getString('nome')
+                    .trim();
+
+
+            const novoNome =
+                interaction.options
+                    .getString('novo-nome');
+
+
+            const novoAtaque =
+                interaction.options
+                    .getString('ataque');
+
+
+            const novoDano =
+                interaction.options
+                    .getString('dano');
+
+
+            const usuario =
+                interaction.user.id;
+
+
+            // =========================
+            // BUSCA ATAQUE ORIGINAL
+            // =========================
+
+            const ataqueSalvo =
+                buscarAtaque(
+                    usuario,
+                    nome
+                );
+
+
+            if (
+                !ataqueSalvo
+            ) {
+
+                await interaction.reply({
+                    content:
+                        `❌ Você não possui um ataque chamado **${nome}**.`,
+                    flags:
+                        MessageFlags.Ephemeral
+                });
+
+
+                return;
+
+            }
+
+
+            // =========================
+            // PRECISA ALTERAR ALGO
+            // =========================
+
+            if (
+                !novoNome &&
+                !novoAtaque &&
+                !novoDano
+            ) {
+
+                await interaction.reply({
+                    content:
+                        '❌ Você precisa informar pelo menos um campo para alterar.',
+                    flags:
+                        MessageFlags.Ephemeral
+                });
+
+
+                return;
+
+            }
+
+
+            // =========================
+            // VALORES FINAIS
+            // =========================
+
+            const nomeFinal =
+                novoNome
+                    ? novoNome.trim()
+                    : ataqueSalvo.nome;
+
+
+            const ataqueFinal =
+                novoAtaque
+                    ? novoAtaque.trim()
+                    : ataqueSalvo.ataque;
+
+
+            const danoFinal =
+                novoDano
+                    ? novoDano.trim()
+                    : ataqueSalvo.dano;
+
+
+            // =========================
+            // VALIDA ATAQUE
+            // =========================
+
+            const infoAtaque =
+                analisarExpressao(
+                    ataqueFinal
+                );
+
+
+            const erroAtaque =
+                validarExpressao(
+                    infoAtaque
+                );
+
+
+            if (
+                erroAtaque
+            ) {
+
+                await interaction.reply({
+                    content:
+                        `❌ Ataque inválido.\n${erroAtaque}\nExemplo: \`3d20+5\`.`,
+                    flags:
+                        MessageFlags.Ephemeral
+                });
+
+
+                return;
+
+            }
+
+
+            // =========================
+            // VALIDA DANO
+            // =========================
+
+            const infoDano =
+                analisarExpressao(
+                    danoFinal
+                );
+
+
+            const erroDano =
+                validarExpressao(
+                    infoDano
+                );
+
+
+            if (
+                erroDano
+            ) {
+
+                await interaction.reply({
+                    content:
+                        `❌ Dano inválido.\n${erroDano}\nExemplo: \`1d10+3\`.`,
+                    flags:
+                        MessageFlags.Ephemeral
+                });
+
+
+                return;
+
+            }
+
+
+            // =========================
+            // EVITA SOBRESCREVER
+            // OUTRO ATAQUE
+            // =========================
+
+            if (
+                nomeFinal.toLowerCase() !==
+                ataqueSalvo.nome.toLowerCase()
+            ) {
+
+                const ataqueExistente =
+                    buscarAtaque(
+                        usuario,
+                        nomeFinal
+                    );
+
+
+                if (
+                    ataqueExistente
+                ) {
+
+                    await interaction.reply({
+                        content:
+                            `❌ Você já possui um ataque chamado **${nomeFinal}**.`,
+                        flags:
+                            MessageFlags.Ephemeral
+                    });
+
+
+                    return;
+
+                }
+
+            }
+
+
+            // =========================
+            // SUBSTITUI ATAQUE
+            // =========================
+
+            removerAtaque(
+                usuario,
+                ataqueSalvo.nome
+            );
+
+
+            salvarAtaque(
+                usuario,
+                nomeFinal,
+                ataqueFinal,
+                danoFinal
+            );
+
+
+            // =========================
+            // CONFIRMAÇÃO
+            // =========================
+
+            await interaction.reply({
+
+                content:
+
+                    `✏️ **Ataque atualizado!**\n\n` +
+
+                    `⚔️ Nome: **${nomeFinal}**\n` +
+
+                    `🎯 Ataque: \`${ataqueFinal}\`\n` +
+
+                    `🩸 Dano: \`${danoFinal}\``,
+
+                flags:
+                    MessageFlags.Ephemeral
+
             });
 
 

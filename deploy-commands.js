@@ -166,6 +166,55 @@ const commands = [
             'Mostra todos os seus ataques salvos'
         ),
 
+    new SlashCommandBuilder()
+
+        .setName('editar-ataque')
+
+        .setDescription(
+            'Edita um ataque salvo'
+        )
+
+        .addStringOption(option =>
+
+            option
+                .setName('nome')
+                .setDescription(
+                    'Ataque que deseja editar'
+                )
+                .setRequired(true)
+                .setAutocomplete(true)
+
+        )
+
+        .addStringOption(option =>
+
+            option
+                .setName('novo-nome')
+                .setDescription(
+                    'Novo nome do ataque'
+                )
+
+        )
+
+        .addStringOption(option =>
+
+            option
+                .setName('ataque')
+                .setDescription(
+                    'Nova rolagem de ataque. Ex: 3d20+5'
+                )
+
+        )
+
+        .addStringOption(option =>
+
+            option
+                .setName('dano')
+                .setDescription(
+                    'Nova rolagem de dano. Ex: 1d10+3'
+                )
+
+        ),
 
     // ==================================================
     // /REMOVER-ATAQUE
@@ -194,6 +243,8 @@ const commands = [
                 .setAutocomplete(true)
 
         )
+
+        
 
 
 ].map(command => command.toJSON());
