@@ -1,68 +1,26 @@
-const Database = require('better-sqlite3');
-const path = require('path');
-const fs = require('fs');
-
-
-// Caminho do volume da Railway.
-// No PC, usa a pasta local do projeto.
-const pastaBanco =
-    process.env.RAILWAY_VOLUME_MOUNT_PATH ||
-    __dirname;
-
-
-// Garante que a pasta exista
-if (!fs.existsSync(pastaBanco)) {
-
-    fs.mkdirSync(
-        pastaBanco,
-        {
-            recursive: true
-        }
-    );
-
-}
-
-
-const caminhoBanco =
-    path.join(
-        pastaBanco,
-        'rd20.db'
-    );
-
-
-console.log(
-    `Banco SQLite: ${caminhoBanco}`
-);
+const {
+    Pool
+} = require('pg');
 
 
 const db =
-    new Database(
-        caminhoBanco
-    );
+    new Pool({
+
+        connectionString:
+            process.env.DATABASE_URL,
+
+        ssl: {
+            rejectUnauthorized: false
+        }
+
+    });
 
 
-db.pragma(
-    'journal_mode = WAL'
-);
+// ==================================================
+// ATAQUES
+// ==================================================
 
-db.prepare(`
-    CREATE TABLE IF NOT EXISTS ataques (
-        usuario_id TEXT NOT NULL,
-        nome_chave TEXT NOT NULL,
-        nome TEXT NOT NULL,
-        ataque TEXT NOT NULL,
-        dano TEXT NOT NULL,
-
-        PRIMARY KEY (usuario_id, nome_chave)
-    )
-`).run();
-
-
-// =============================
-// SALVAR ATAQUE
-// =============================
-
-function salvarAtaque(
+async function salvarAtaque(
     usuarioId,
     nome,
     ataque,
@@ -70,9 +28,11 @@ function salvarAtaque(
 ) {
 
     const nomeChave =
-        nome.toLowerCase();
+        nome.toLowerCase().trim();
 
-    const comando = db.prepare(`
+
+    await db.query(
+        `
         INSERT INTO ataques (
             usuario_id,
             nome_chave,
@@ -80,94 +40,291 @@ function salvarAtaque(
             ataque,
             dano
         )
-        VALUES (?, ?, ?, ?, ?)
 
-        ON CONFLICT(usuario_id, nome_chave)
+        VALUES (
+            $1,
+            $2,
+            $3,
+            $4,
+            $5
+        )
+
+        ON CONFLICT (
+            usuario_id,
+            nome_chave
+        )
+
         DO UPDATE SET
-            nome = excluded.nome,
-            ataque = excluded.ataque,
-            dano = excluded.dano
-    `);
-
-    comando.run(
-        usuarioId,
-        nomeChave,
-        nome,
-        ataque,
-        dano
+            nome = EXCLUDED.nome,
+            ataque = EXCLUDED.ataque,
+            dano = EXCLUDED.dano
+        `,
+        [
+            usuarioId,
+            nomeChave,
+            nome,
+            ataque,
+            dano
+        ]
     );
+
 }
 
 
-// =============================
-// BUSCAR ATAQUE
-// =============================
-
-function buscarAtaque(
+async function buscarAtaque(
     usuarioId,
     nome
 ) {
 
     const nomeChave =
-        nome.toLowerCase();
+        nome.toLowerCase().trim();
 
-    return db.prepare(`
-        SELECT *
-        FROM ataques
-        WHERE usuario_id = ?
-        AND nome_chave = ?
-    `).get(
-        usuarioId,
-        nomeChave
-    );
+
+    const resultado =
+        await db.query(
+            `
+            SELECT
+                usuario_id,
+                nome_chave,
+                nome,
+                ataque,
+                dano
+
+            FROM ataques
+
+            WHERE usuario_id = $1
+            AND nome_chave = $2
+            `,
+            [
+                usuarioId,
+                nomeChave
+            ]
+        );
+
+
+    return resultado.rows[0];
+
 }
 
 
-// =============================
-// LISTAR ATAQUES
-// =============================
-
-function listarAtaques(
+async function listarAtaques(
     usuarioId
 ) {
 
-    return db.prepare(`
-        SELECT *
-        FROM ataques
-        WHERE usuario_id = ?
-        ORDER BY nome ASC
-    `).all(
-        usuarioId
-    );
+    const resultado =
+        await db.query(
+            `
+            SELECT
+                usuario_id,
+                nome_chave,
+                nome,
+                ataque,
+                dano
+
+            FROM ataques
+
+            WHERE usuario_id = $1
+
+            ORDER BY nome
+            `,
+            [
+                usuarioId
+            ]
+        );
+
+
+    return resultado.rows;
+
 }
 
 
-// =============================
-// REMOVER ATAQUE
-// =============================
-
-function removerAtaque(
+async function removerAtaque(
     usuarioId,
     nome
 ) {
 
     const nomeChave =
-        nome.toLowerCase();
+        nome.toLowerCase().trim();
 
-    return db.prepare(`
-        DELETE FROM ataques
-        WHERE usuario_id = ?
-        AND nome_chave = ?
-    `).run(
-        usuarioId,
-        nomeChave
-    );
+
+    const resultado =
+        await db.query(
+            `
+            DELETE FROM ataques
+
+            WHERE usuario_id = $1
+            AND nome_chave = $2
+            `,
+            [
+                usuarioId,
+                nomeChave
+            ]
+        );
+
+
+    return resultado;
+
 }
 
 
+// ==================================================
+// ROLAGENS
+// ==================================================
+
+async function salvarRolagem(
+    usuarioId,
+    nome,
+    rolagem
+) {
+
+    const nomeChave =
+        nome.toLowerCase().trim();
+
+
+    await db.query(
+        `
+        INSERT INTO rolagens (
+            usuario_id,
+            nome_chave,
+            nome,
+            rolagem
+        )
+
+        VALUES (
+            $1,
+            $2,
+            $3,
+            $4
+        )
+
+        ON CONFLICT (
+            usuario_id,
+            nome_chave
+        )
+
+        DO UPDATE SET
+            nome = EXCLUDED.nome,
+            rolagem = EXCLUDED.rolagem
+        `,
+        [
+            usuarioId,
+            nomeChave,
+            nome,
+            rolagem
+        ]
+    );
+
+}
+
+
+async function buscarRolagem(
+    usuarioId,
+    nome
+) {
+
+    const nomeChave =
+        nome.toLowerCase().trim();
+
+
+    const resultado =
+        await db.query(
+            `
+            SELECT
+                usuario_id,
+                nome_chave,
+                nome,
+                rolagem
+
+            FROM rolagens
+
+            WHERE usuario_id = $1
+            AND nome_chave = $2
+            `,
+            [
+                usuarioId,
+                nomeChave
+            ]
+        );
+
+
+    return resultado.rows[0];
+
+}
+
+
+async function listarRolagens(
+    usuarioId
+) {
+
+    const resultado =
+        await db.query(
+            `
+            SELECT
+                usuario_id,
+                nome_chave,
+                nome,
+                rolagem
+
+            FROM rolagens
+
+            WHERE usuario_id = $1
+
+            ORDER BY nome
+            `,
+            [
+                usuarioId
+            ]
+        );
+
+
+    return resultado.rows;
+
+}
+
+
+async function removerRolagem(
+    usuarioId,
+    nome
+) {
+
+    const nomeChave =
+        nome.toLowerCase().trim();
+
+
+    const resultado =
+        await db.query(
+            `
+            DELETE FROM rolagens
+
+            WHERE usuario_id = $1
+            AND nome_chave = $2
+            `,
+            [
+                usuarioId,
+                nomeChave
+            ]
+        );
+
+
+    return resultado;
+
+}
+
+
+// ==================================================
+// EXPORTS
+// ==================================================
+
 module.exports = {
+
     salvarAtaque,
     buscarAtaque,
     listarAtaques,
-    removerAtaque
+    removerAtaque,
+
+    salvarRolagem,
+    buscarRolagem,
+    listarRolagens,
+    removerRolagem
+
 };

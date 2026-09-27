@@ -44,16 +44,11 @@ function analisarExpressao(expressao) {
     const resultado =
         expressao.match(regex);
 
-
     if (!resultado) {
-
         return null;
-
     }
 
-
     return {
-
         quantidade:
             parseInt(resultado[1]),
 
@@ -67,9 +62,7 @@ function analisarExpressao(expressao) {
 
         modificador:
             parseInt(resultado[4]) || 0
-
     };
-
 }
 
 
@@ -80,55 +73,40 @@ function analisarExpressao(expressao) {
 function validarExpressao(info) {
 
     if (!info) {
-
         return '❌ Formato de rolagem inválido.';
-
     }
-
 
     if (
         info.quantidade < 1 ||
         info.quantidade > 100
     ) {
-
         return '❌ A quantidade de dados deve estar entre **1 e 100**.';
-
     }
-
 
     if (
         info.faces < 2 ||
         info.faces > 1000
     ) {
-
         return '❌ O dado deve ter entre **2 e 1000 faces**.';
-
     }
-
 
     if (
         info.modificador < -10000 ||
         info.modificador > 10000
     ) {
-
         return '❌ O modificador deve estar entre **-10000 e +10000**.';
-
     }
-
 
     if (
         info.manter &&
         info.quantidade < 2
     ) {
-
         return '❌ `kh1` e `kl1` precisam de pelo menos **2 dados**.';
-
     }
 
-
     return null;
-
 }
+
 
 // ==================================================
 // CRIAR DANO CRÍTICO
@@ -139,38 +117,29 @@ function criarDanoCritico(expressao) {
     const info =
         analisarExpressao(expressao);
 
-
     if (!info) {
         return expressao;
     }
 
-
     const quantidadeCritica =
         info.quantidade * 2;
-
 
     let expressaoCritica =
         `${quantidadeCritica}d${info.faces}`;
 
-
     if (info.manter) {
-
         expressaoCritica +=
             info.manter;
-
     }
-
 
     if (info.modificador !== 0) {
-
         expressaoCritica +=
             `${info.modificador > 0 ? '+' : ''}${info.modificador}`;
-
     }
-
 
     return expressaoCritica;
 }
+
 
 // ==================================================
 // ROLAR DADOS
@@ -181,8 +150,7 @@ function rolarDados(
     faces
 ) {
 
-    let dados = [];
-
+    const dados = [];
 
     for (
         let i = 0;
@@ -195,14 +163,10 @@ function rolarDados(
                 Math.random() * faces
             ) + 1;
 
-
         dados.push(dado);
-
     }
 
-
     return dados;
-
 }
 
 
@@ -218,42 +182,27 @@ function formatarDado(
 
     let texto = `${dado}`;
 
-
-    // Crítico / falha crítica
     if (
         selecionado &&
         faces === 20
     ) {
 
         if (dado === 20) {
-
             texto =
                 `⭐ ${dado}`;
-
         }
-
 
         if (dado === 1) {
-
             texto =
                 `💀 ${dado}`;
-
         }
-
     }
 
-
-    // Dado usado fica em negrito
     if (selecionado) {
-
         return `**${texto}**`;
-
     }
 
-
-    // Dado descartado fica normal
     return texto;
-
 }
 
 
@@ -272,33 +221,25 @@ function executarRolagem(
             expressao
         );
 
-
     const erro =
         validarExpressao(
             info
         );
 
-
     if (erro) {
-
         return {
             erro
         };
-
     }
-
 
     let quantidade =
         info.quantidade;
 
-
     const faces =
         info.faces;
 
-
     const modificador =
         info.modificador;
-
 
     let tipoSelecao =
         null;
@@ -311,10 +252,8 @@ function executarRolagem(
     if (
         info.manter === 'kh1'
     ) {
-
         tipoSelecao =
             'maior';
-
     }
 
 
@@ -325,14 +264,14 @@ function executarRolagem(
     if (
         info.manter === 'kl1'
     ) {
-
         tipoSelecao =
             'menor';
-
     }
 
+
     // =========================
-    // MAIOR D20 AUTOMÁTICO EM ATAQUES
+    // MAIOR D20 AUTOMÁTICO
+    // EM ATAQUES
     // =========================
 
     if (
@@ -341,9 +280,8 @@ function executarRolagem(
         quantidade > 1 &&
         !info.manter
     ) {
-
-        tipoSelecao = 'maior';
-
+        tipoSelecao =
+            'maior';
     }
 
 
@@ -358,17 +296,12 @@ function executarRolagem(
         tipoSelecao =
             'maior';
 
-
-        // Um d20 vira dois d20
         if (
             quantidade === 1 &&
             faces === 20
         ) {
-
             quantidade = 2;
-
         }
-
     }
 
 
@@ -383,16 +316,12 @@ function executarRolagem(
         tipoSelecao =
             'menor';
 
-
         if (
             quantidade === 1 &&
             faces === 20
         ) {
-
             quantidade = 2;
-
         }
-
     }
 
 
@@ -406,10 +335,8 @@ function executarRolagem(
             faces
         );
 
-
     let indiceEscolhido =
         null;
-
 
     let valorEscolhido =
         null;
@@ -425,12 +352,10 @@ function executarRolagem(
                 ...dados
             );
 
-
         indiceEscolhido =
             dados.indexOf(
                 valorEscolhido
             );
-
     }
 
 
@@ -444,12 +369,10 @@ function executarRolagem(
                 ...dados
             );
 
-
         indiceEscolhido =
             dados.indexOf(
                 valorEscolhido
             );
-
     }
 
 
@@ -458,7 +381,6 @@ function executarRolagem(
     // =========================
 
     let total = 0;
-
 
     if (tipoSelecao) {
 
@@ -490,8 +412,6 @@ function executarRolagem(
         dados.map(
             (dado, indice) => {
 
-
-                // Rolagem normal
                 if (!tipoSelecao) {
 
                     return formatarDado(
@@ -502,8 +422,6 @@ function executarRolagem(
 
                 }
 
-
-                // Dado escolhido
                 if (
                     indice ===
                     indiceEscolhido
@@ -517,14 +435,11 @@ function executarRolagem(
 
                 }
 
-
-                // Dado descartado
                 return formatarDado(
                     dado,
                     faces,
                     false
                 );
-
             }
         );
 
@@ -536,90 +451,62 @@ function executarRolagem(
     let critico =
         false;
 
-
     let falhaCritica =
         false;
-
 
     if (
         faces === 20
     ) {
 
-
-        // Vantagem / desvantagem
         if (tipoSelecao) {
 
             if (
                 valorEscolhido === 20
             ) {
-
                 critico =
                     true;
-
             }
-
 
             if (
                 valorEscolhido === 1
             ) {
-
                 falhaCritica =
                     true;
-
             }
 
         }
 
-
-        // Rolagem normal
         else {
 
             if (
                 dados.includes(20)
             ) {
-
                 critico =
                     true;
-
             }
-
 
             if (
                 dados.includes(1)
             ) {
-
                 falhaCritica =
                     true;
-
             }
 
         }
-
     }
 
 
     return {
-
         dados,
-
         dadosFormatados,
-
         total,
-
         faces,
-
         quantidade,
-
         modificador,
-
         tipoSelecao,
-
         critico,
-
         falhaCritica
-
     };
-
 }
 
 
@@ -664,7 +551,6 @@ client.on(
             interaction.isAutocomplete()
         ) {
 
-
             if (
                 interaction.commandName === 'ataque' ||
                 interaction.commandName === 'remover-ataque' ||
@@ -674,18 +560,15 @@ client.on(
                 const usuario =
                     interaction.user.id;
 
-
                 const ataquesUsuario =
-                    listarAtaques(
+                    await listarAtaques(
                         usuario
                     );
-
 
                 const digitado =
                     interaction.options
                         .getFocused()
                         .toLowerCase();
-
 
                 const sugestoes =
                     ataquesUsuario
@@ -703,29 +586,22 @@ client.on(
                         )
                         .map(
                             ataque => ({
-
                                 name:
                                     ataque.nome,
 
                                 value:
                                     ataque.nome
-
                             })
                         );
-
 
                 await interaction.respond(
                     sugestoes
                 );
 
-
                 return;
-
             }
 
-
             return;
-
         }
 
 
@@ -742,45 +618,33 @@ client.on(
                     interaction.customId
                 );
 
-
             if (!pendente) {
 
                 await interaction.reply({
-
                     content:
                         '❌ Essa rolagem expirou.',
-
-                    ephemeral:
-                        true
-
+                    flags:
+                        MessageFlags.Ephemeral
                 });
 
-
                 return;
-
             }
 
 
-            // Somente o dono do ataque
-            // pode clicar
+            // Somente o dono pode clicar
             if (
                 interaction.user.id !==
                 pendente.usuario
             ) {
 
                 await interaction.reply({
-
                     content:
                         '❌ Esse ataque pertence a outro jogador.',
-
-                    ephemeral:
-                        true
-
+                    flags:
+                        MessageFlags.Ephemeral
                 });
 
-
                 return;
-
             }
 
 
@@ -797,25 +661,18 @@ client.on(
                     pendente.idRolar
                 );
 
-
                 ataquesPendentes.delete(
                     pendente.idCancelar
                 );
 
-
                 await interaction.update({
-
                     content:
                         '❌ Rolagem cancelada.',
-
                     components:
                         []
-
                 });
 
-
                 return;
-
             }
 
 
@@ -835,10 +692,8 @@ client.on(
                         true
                     );
 
-
                 let expressaoDano =
                     pendente.dano;
-
 
                 if (
                     ataque.critico
@@ -848,15 +703,12 @@ client.on(
                         criarDanoCritico(
                             pendente.dano
                         );
-
                 }
-
 
                 const dano =
                     executarRolagem(
                         expressaoDano
                     );
-
 
                 if (
                     ataque.erro ||
@@ -864,18 +716,13 @@ client.on(
                 ) {
 
                     await interaction.update({
-
                         content:
                             '❌ Erro ao interpretar os dados do ataque.',
-
                         components:
                             []
-
                     });
 
-
                     return;
-
                 }
 
 
@@ -889,7 +736,6 @@ client.on(
 
                 resposta +=
                     `🎯 **Ataque — ${pendente.ataque.toUpperCase()}**\n`;
-
 
                 if (
                     ataque.quantidade === 1
@@ -907,7 +753,6 @@ client.on(
 
                 }
 
-
                 if (
                     ataque.modificador !== 0
                 ) {
@@ -917,10 +762,8 @@ client.on(
 
                 }
 
-
                 resposta +=
                     `**Resultado: ${ataque.total}**\n`;
-
 
                 if (
                     ataque.critico
@@ -930,7 +773,6 @@ client.on(
                         '🔥 **CRÍTICO NATURAL!**\n';
 
                 }
-
 
                 if (
                     ataque.falhaCritica
@@ -962,7 +804,6 @@ client.on(
 
                 }
 
-
                 if (
                     dano.quantidade === 1
                 ) {
@@ -979,7 +820,6 @@ client.on(
 
                 }
 
-
                 if (
                     dano.modificador !== 0
                 ) {
@@ -989,12 +829,10 @@ client.on(
 
                 }
 
-
                 resposta +=
                     `**Resultado: ${dano.total}**`;
 
 
-                // Apaga os botões pendentes
                 ataquesPendentes.delete(
                     pendente.idRolar
                 );
@@ -1013,17 +851,16 @@ client.on(
                 });
 
 
-                // Publica o resultado no canal
+                // Publica o resultado
                 await interaction.followUp({
                     content:
                         resposta
                 });
 
-
                 return;
-
             }
 
+            return;
         }
 
 
@@ -1034,9 +871,7 @@ client.on(
         if (
             !interaction.isChatInputCommand()
         ) {
-
             return;
-
         }
 
 
@@ -1054,12 +889,10 @@ client.on(
                     .getString('nome')
                     .trim();
 
-
             const ataque =
                 interaction.options
                     .getString('ataque')
                     .trim();
-
 
             const dano =
                 interaction.options
@@ -1076,12 +909,10 @@ client.on(
                     ataque
                 );
 
-
             const erroAtaque =
                 validarExpressao(
                     infoAtaque
                 );
-
 
             if (
                 erroAtaque
@@ -1090,12 +921,11 @@ client.on(
                 await interaction.reply({
                     content:
                         `❌ Ataque inválido.\n${erroAtaque}\nExemplo: \`1d20+5\`.`,
-                    flags: MessageFlags.Ephemeral
+                    flags:
+                        MessageFlags.Ephemeral
                 });
 
-
                 return;
-
             }
 
 
@@ -1108,12 +938,10 @@ client.on(
                     dano
                 );
 
-
             const erroDano =
                 validarExpressao(
                     infoDano
                 );
-
 
             if (
                 erroDano
@@ -1122,12 +950,11 @@ client.on(
                 await interaction.reply({
                     content:
                         `❌ Dano inválido.\n${erroDano}\nExemplo: \`1d10+3\`.`,
-                    flags: MessageFlags.Ephemeral
+                    flags:
+                        MessageFlags.Ephemeral
                 });
 
-
                 return;
-
             }
 
 
@@ -1136,10 +963,10 @@ client.on(
 
 
             // =========================
-            // SALVA NO SQLITE
+            // SALVA NO POSTGRESQL
             // =========================
 
-            salvarAtaque(
+            await salvarAtaque(
                 usuario,
                 nome,
                 ataque,
@@ -1152,12 +979,11 @@ client.on(
                     `✅ **${nome}** foi salvo!\n\n` +
                     `🎯 Ataque: \`${ataque}\`\n` +
                     `🩸 Dano: \`${dano}\``,
-                flags: MessageFlags.Ephemeral
+                flags:
+                    MessageFlags.Ephemeral
             });
 
-
             return;
-
         }
 
 
@@ -1173,12 +999,10 @@ client.on(
             const usuario =
                 interaction.user.id;
 
-
             const ataquesUsuario =
-                listarAtaques(
+                await listarAtaques(
                     usuario
                 );
-
 
             if (
                 ataquesUsuario.length === 0
@@ -1187,22 +1011,19 @@ client.on(
                 await interaction.reply({
                     content:
                         '📭 Você ainda não possui nenhum ataque salvo.',
-                    flags: MessageFlags.Ephemeral
+                    flags:
+                        MessageFlags.Ephemeral
                 });
 
-
                 return;
-
             }
 
 
             let resposta =
                 '⚔️ **Seus ataques salvos**\n\n';
 
-
             let numero =
                 1;
-
 
             for (
                 const ataque
@@ -1212,28 +1033,24 @@ client.on(
                 resposta +=
                     `**${numero}. ${ataque.nome}**\n`;
 
-
                 resposta +=
                     `🎯 Ataque: \`${ataque.ataque}\`\n`;
-
 
                 resposta +=
                     `🩸 Dano: \`${ataque.dano}\`\n\n`;
 
-
                 numero++;
-
             }
 
 
             await interaction.reply({
-                content: resposta,
-                flags: MessageFlags.Ephemeral
+                content:
+                    resposta,
+                flags:
+                    MessageFlags.Ephemeral
             });
 
-
             return;
-
         }
 
 
@@ -1251,17 +1068,14 @@ client.on(
                     .getString('nome')
                     .trim();
 
-
             const usuario =
                 interaction.user.id;
 
-
             const ataqueSalvo =
-                buscarAtaque(
+                await buscarAtaque(
                     usuario,
                     nome
                 );
-
 
             if (
                 !ataqueSalvo
@@ -1270,16 +1084,15 @@ client.on(
                 await interaction.reply({
                     content:
                         `❌ Você não possui um ataque chamado **${nome}**.`,
-                    flags: MessageFlags.Ephemeral
+                    flags:
+                        MessageFlags.Ephemeral
                 });
 
-
                 return;
-
             }
 
 
-            removerAtaque(
+            await removerAtaque(
                 usuario,
                 nome
             );
@@ -1288,13 +1101,13 @@ client.on(
             await interaction.reply({
                 content:
                     `🗑️ **${ataqueSalvo.nome}** foi removido dos seus ataques.`,
-                flags: MessageFlags.Ephemeral
+                flags:
+                    MessageFlags.Ephemeral
             });
 
-
             return;
-
         }
+
 
         // ==================================================
         // /EDITAR-ATAQUE
@@ -1310,21 +1123,17 @@ client.on(
                     .getString('nome')
                     .trim();
 
-
             const novoNome =
                 interaction.options
                     .getString('novo-nome');
-
 
             const novoAtaque =
                 interaction.options
                     .getString('ataque');
 
-
             const novoDano =
                 interaction.options
                     .getString('dano');
-
 
             const usuario =
                 interaction.user.id;
@@ -1335,11 +1144,10 @@ client.on(
             // =========================
 
             const ataqueSalvo =
-                buscarAtaque(
+                await buscarAtaque(
                     usuario,
                     nome
                 );
-
 
             if (
                 !ataqueSalvo
@@ -1352,9 +1160,7 @@ client.on(
                         MessageFlags.Ephemeral
                 });
 
-
                 return;
-
             }
 
 
@@ -1375,9 +1181,7 @@ client.on(
                         MessageFlags.Ephemeral
                 });
 
-
                 return;
-
             }
 
 
@@ -1390,12 +1194,10 @@ client.on(
                     ? novoNome.trim()
                     : ataqueSalvo.nome;
 
-
             const ataqueFinal =
                 novoAtaque
                     ? novoAtaque.trim()
                     : ataqueSalvo.ataque;
-
 
             const danoFinal =
                 novoDano
@@ -1412,12 +1214,10 @@ client.on(
                     ataqueFinal
                 );
 
-
             const erroAtaque =
                 validarExpressao(
                     infoAtaque
                 );
-
 
             if (
                 erroAtaque
@@ -1430,9 +1230,7 @@ client.on(
                         MessageFlags.Ephemeral
                 });
 
-
                 return;
-
             }
 
 
@@ -1445,12 +1243,10 @@ client.on(
                     danoFinal
                 );
 
-
             const erroDano =
                 validarExpressao(
                     infoDano
                 );
-
 
             if (
                 erroDano
@@ -1463,9 +1259,7 @@ client.on(
                         MessageFlags.Ephemeral
                 });
 
-
                 return;
-
             }
 
 
@@ -1480,11 +1274,10 @@ client.on(
             ) {
 
                 const ataqueExistente =
-                    buscarAtaque(
+                    await buscarAtaque(
                         usuario,
                         nomeFinal
                     );
-
 
                 if (
                     ataqueExistente
@@ -1497,11 +1290,8 @@ client.on(
                             MessageFlags.Ephemeral
                     });
 
-
                     return;
-
                 }
-
             }
 
 
@@ -1509,13 +1299,12 @@ client.on(
             // SUBSTITUI ATAQUE
             // =========================
 
-            removerAtaque(
+            await removerAtaque(
                 usuario,
                 ataqueSalvo.nome
             );
 
-
-            salvarAtaque(
+            await salvarAtaque(
                 usuario,
                 nomeFinal,
                 ataqueFinal,
@@ -1528,25 +1317,16 @@ client.on(
             // =========================
 
             await interaction.reply({
-
                 content:
-
                     `✏️ **Ataque atualizado!**\n\n` +
-
                     `⚔️ Nome: **${nomeFinal}**\n` +
-
                     `🎯 Ataque: \`${ataqueFinal}\`\n` +
-
                     `🩸 Dano: \`${danoFinal}\``,
-
                 flags:
                     MessageFlags.Ephemeral
-
             });
 
-
             return;
-
         }
 
 
@@ -1564,27 +1344,24 @@ client.on(
                     .getString('nome')
                     .trim();
 
-
             const modo =
                 interaction.options
                     .getString('modo')
                 || 'normal';
-
 
             const usuario =
                 interaction.user.id;
 
 
             // =========================
-            // BUSCA NO SQLITE
+            // BUSCA NO POSTGRESQL
             // =========================
 
             const ataqueSalvo =
-                buscarAtaque(
+                await buscarAtaque(
                     usuario,
                     nome
                 );
-
 
             if (
                 !ataqueSalvo
@@ -1593,12 +1370,11 @@ client.on(
                 await interaction.reply({
                     content:
                         `❌ Você não possui um ataque chamado **${nome}**.`,
-                    flags: MessageFlags.Ephemeral
+                    flags:
+                        MessageFlags.Ephemeral
                 });
 
-
                 return;
-
             }
 
 
@@ -1608,7 +1384,6 @@ client.on(
 
             let ataquePreview =
                 ataqueSalvo.ataque;
-
 
             const infoAtaque =
                 analisarExpressao(
@@ -1643,13 +1418,11 @@ client.on(
                             : ''
 
                     }`;
-
             }
 
 
             const idRolar =
                 `rolar_${interaction.id}`;
-
 
             const idCancelar =
                 `cancelar_${interaction.id}`;
@@ -1662,7 +1435,6 @@ client.on(
             ataquesPendentes.set(
                 idRolar,
                 {
-
                     acao:
                         'rolar',
 
@@ -1680,9 +1452,7 @@ client.on(
                     modo,
 
                     idRolar,
-
                     idCancelar
-
                 }
             );
 
@@ -1694,35 +1464,28 @@ client.on(
             ataquesPendentes.set(
                 idCancelar,
                 {
-
                     acao:
                         'cancelar',
 
                     usuario,
 
                     idRolar,
-
                     idCancelar
-
                 }
             );
 
 
             const botaoRolar =
                 new ButtonBuilder()
-
                     .setCustomId(
                         idRolar
                     )
-
                     .setLabel(
                         'Rolar'
                     )
-
                     .setEmoji(
                         '🎲'
                     )
-
                     .setStyle(
                         ButtonStyle.Primary
                     );
@@ -1730,15 +1493,12 @@ client.on(
 
             const botaoCancelar =
                 new ButtonBuilder()
-
                     .setCustomId(
                         idCancelar
                     )
-
                     .setLabel(
                         'Cancelar'
                     )
-
                     .setStyle(
                         ButtonStyle.Secondary
                     );
@@ -1746,7 +1506,6 @@ client.on(
 
             const botoes =
                 new ActionRowBuilder()
-
                     .addComponents(
                         botaoRolar,
                         botaoCancelar
@@ -1756,10 +1515,8 @@ client.on(
             let resposta =
                 `⚔️ **${ataqueSalvo.nome}**\n\n`;
 
-
             resposta +=
                 `🎯 Ataque: \`${ataquePreview}\``;
-
 
             if (
                 modo === 'vantagem'
@@ -1770,7 +1527,6 @@ client.on(
 
             }
 
-
             if (
                 modo === 'desvantagem'
             ) {
@@ -1780,24 +1536,23 @@ client.on(
 
             }
 
-
             resposta +=
                 `\n🩸 Dano: \`${ataqueSalvo.dano}\`\n\n`;
-
 
             resposta +=
                 'Confirmar rolagem?';
 
 
             await interaction.reply({
-                content: resposta,
-                components: [botoes],
-                flags: MessageFlags.Ephemeral
+                content:
+                    resposta,
+                components:
+                    [botoes],
+                flags:
+                    MessageFlags.Ephemeral
             });
 
-
             return;
-
         }
 
 
@@ -1815,7 +1570,6 @@ client.on(
                     .getString('expressao')
                     .trim();
 
-
             let modo =
                 'normal';
 
@@ -1832,13 +1586,11 @@ client.on(
                 modo =
                     'vantagem';
 
-
                 expressao =
                     expressao.replace(
                         /\s+vantagem$/i,
                         ''
                     );
-
             }
 
 
@@ -1854,13 +1606,11 @@ client.on(
                 modo =
                     'desvantagem';
 
-
                 expressao =
                     expressao.replace(
                         /\s+desvantagem$/i,
                         ''
                     );
-
             }
 
 
@@ -1876,13 +1626,11 @@ client.on(
                 modo =
                     'vantagem';
 
-
                 expressao =
                     expressao.replace(
                         /\s+adv$/i,
                         ''
                     );
-
             }
 
 
@@ -1898,13 +1646,11 @@ client.on(
                 modo =
                     'desvantagem';
 
-
                 expressao =
                     expressao.replace(
                         /\s+dis$/i,
                         ''
                     );
-
             }
 
 
@@ -1914,22 +1660,16 @@ client.on(
                     modo
                 );
 
-
             if (
                 resultado.erro
             ) {
 
                 await interaction.reply(
-
                     resultado.erro +
-
                     '\nExemplos: `1d20`, `2d6+3`, `2d20 vantagem`.'
-
                 );
 
-
                 return;
-
             }
 
 
@@ -1940,24 +1680,18 @@ client.on(
             let titulo =
                 expressao.toUpperCase();
 
-
             if (
                 modo === 'vantagem'
             ) {
-
                 titulo +=
                     ' — VANTAGEM';
-
             }
-
 
             if (
                 modo === 'desvantagem'
             ) {
-
                 titulo +=
                     ' — DESVANTAGEM';
-
             }
 
 
@@ -1967,7 +1701,6 @@ client.on(
 
             let resposta =
                 `🎲 **${titulo}**\n`;
-
 
             if (
                 resultado.quantidade === 1
@@ -1985,7 +1718,6 @@ client.on(
 
             }
 
-
             if (
                 resultado.modificador !== 0
             ) {
@@ -1995,10 +1727,8 @@ client.on(
 
             }
 
-
             resposta +=
                 `\n**Resultado: ${resultado.total}**`;
-
 
             if (
                 resultado.critico
@@ -2008,7 +1738,6 @@ client.on(
                     '\n🔥 **CRÍTICO NATURAL!**';
 
             }
-
 
             if (
                 resultado.falhaCritica
@@ -2024,11 +1753,8 @@ client.on(
                 resposta
             );
 
-
             return;
-
         }
-
     }
 );
 
