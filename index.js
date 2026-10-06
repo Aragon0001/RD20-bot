@@ -13,7 +13,11 @@ const {
     salvarAtaque,
     buscarAtaque,
     listarAtaques,
-    removerAtaque
+    removerAtaque,
+
+    salvarRolagem,
+    buscarRolagem,
+    listarRolagens
 } = require('./database');
 
 
@@ -550,6 +554,59 @@ client.on(
         if (
             interaction.isAutocomplete()
         ) {
+            if (
+                interaction.commandName ===
+                'rolagem'
+            ) {
+
+                const usuario =
+                    interaction.user.id;
+
+
+                const rolagensUsuario =
+                    await listarRolagens(
+                        usuario
+                    );
+
+
+                const digitado =
+                    interaction.options
+                        .getFocused()
+                        .toLowerCase();
+
+
+                const sugestoes =
+                    rolagensUsuario
+                        .filter(
+                            rolagem =>
+                                rolagem.nome
+                                    .toLowerCase()
+                                    .includes(
+                                        digitado
+                                    )
+                        )
+                        .slice(
+                            0,
+                            25
+                        )
+                        .map(
+                            rolagem => ({
+                                name:
+                                    rolagem.nome,
+
+                                value:
+                                    rolagem.nome
+                            })
+                        );
+
+
+                await interaction.respond(
+                    sugestoes
+                );
+
+
+                return;
+            }
 
             if (
                 interaction.commandName === 'ataque' ||
@@ -874,6 +931,211 @@ client.on(
             return;
         }
 
+        // ==================================================
+        // /SALVAR-ROLAGEM
+        // ==================================================
+
+        if (
+            interaction.commandName ===
+            'salvar-rolagem'
+        ) {
+
+            const nome =
+                interaction.options
+                    .getString('nome')
+                    .trim();
+
+
+            const rolagem =
+                interaction.options
+                    .getString('rolagem')
+                    .trim();
+
+
+            const info =
+                analisarExpressao(
+                    rolagem
+                );
+
+
+            const erro =
+                validarExpressao(
+                    info
+                );
+
+
+            if (
+                erro
+            ) {
+
+                await interaction.reply({
+                    content:
+                        `❌ Rolagem inválida.\n${erro}\n` +
+                        'Exemplos: `1d20+5`, `3d20+10`, `2d6+3`.',
+                    flags:
+                        MessageFlags.Ephemeral
+                });
+
+
+                return;
+            }
+
+
+            await salvarRolagem(
+                interaction.user.id,
+                nome,
+                rolagem
+            );
+
+
+            await interaction.reply({
+
+                content:
+                    `✅ **${nome}** foi salva!\n\n` +
+                    `🎲 Rolagem: \`${rolagem}\``,
+
+                flags:
+                    MessageFlags.Ephemeral
+
+            });
+
+
+            return;
+        }
+
+        // ==================================================
+        // /ROLAGEM
+        // ==================================================
+
+        if (
+            interaction.commandName ===
+            'rolagem'
+        ) {
+
+            const nome =
+                interaction.options
+                    .getString('nome')
+                    .trim();
+
+
+            const usuario =
+                interaction.user.id;
+
+
+            const rolagemSalva =
+                await buscarRolagem(
+                    usuario,
+                    nome
+                );
+
+
+            if (
+                !rolagemSalva
+            ) {
+
+                await interaction.reply({
+                    content:
+                        `❌ Você não possui uma rolagem chamada **${nome}**.`,
+                    flags:
+                        MessageFlags.Ephemeral
+                });
+
+
+                return;
+            }
+
+
+            // true = múltiplos d20 usam automaticamente o maior
+            const resultado =
+                executarRolagem(
+                    rolagemSalva.rolagem,
+                    'normal',
+                    true
+                );
+
+
+            if (
+                resultado.erro
+            ) {
+
+                await interaction.reply({
+                    content:
+                        resultado.erro,
+                    flags:
+                        MessageFlags.Ephemeral
+                });
+
+
+                return;
+            }
+
+
+            let resposta =
+                `🎲 **${rolagemSalva.nome.toUpperCase()}**\n\n`;
+
+
+            resposta +=
+                `Rolagem: \`${rolagemSalva.rolagem}\`\n`;
+
+
+            if (
+                resultado.quantidade === 1
+            ) {
+
+                resposta +=
+                    `Dado: ${resultado.dadosFormatados[0]}\n`;
+
+            }
+
+            else {
+
+                resposta +=
+                    `Dados: [${resultado.dadosFormatados.join(', ')}]\n`;
+
+            }
+
+
+            if (
+                resultado.modificador !== 0
+            ) {
+
+                resposta +=
+                    `Bônus: **${resultado.modificador > 0 ? '+' : ''}${resultado.modificador}**\n`;
+
+            }
+
+
+            resposta +=
+                `**Resultado: ${resultado.total}**`;
+
+
+            if (
+                resultado.critico
+            ) {
+
+                resposta +=
+                    '\n🔥 **CRÍTICO NATURAL!**';
+
+            }
+
+
+            if (
+                resultado.falhaCritica
+            ) {
+
+                resposta +=
+                    '\n💀 **FALHA CRÍTICA!**';
+
+            }
+
+
+            await interaction.reply(
+                resposta
+            );
+
+
+            return;
+        }
 
         // ==================================================
         // /SALVAR-ATAQUE

@@ -154,6 +154,57 @@ const commands = [
         ),
 
 
+        new SlashCommandBuilder()
+
+            .setName('salvar-rolagem')
+
+            .setDescription(
+                'Salva uma rolagem para usar depois'
+            )
+
+            .addStringOption(option =>
+
+                option
+                    .setName('nome')
+                    .setDescription(
+                        'Nome da rolagem. Ex: Iniciativa'
+                    )
+                    .setRequired(true)
+
+            )
+
+            .addStringOption(option =>
+
+                option
+                    .setName('rolagem')
+                    .setDescription(
+                        'Ex: 1d20+5 ou 3d20+10'
+                    )
+                    .setRequired(true)
+
+            ),
+
+
+        new SlashCommandBuilder()
+
+            .setName('rolagem')
+
+            .setDescription(
+                'Executa uma rolagem salva'
+            )
+
+            .addStringOption(option =>
+
+                option
+                    .setName('nome')
+                    .setDescription(
+                        'Rolagem que deseja executar'
+                    )
+                    .setRequired(true)
+                    .setAutocomplete(true)
+
+            ),
+
     // ==================================================
     // /LISTAR-ATAQUES
     // ==================================================

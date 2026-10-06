@@ -310,6 +310,127 @@ async function removerRolagem(
 
 }
 
+// ==================================================
+// SALVAR ROLAGEM
+// ==================================================
+
+async function salvarRolagem(
+    usuarioId,
+    nome,
+    rolagem
+) {
+
+    const nomeChave =
+        nome.toLowerCase().trim();
+
+
+    await db.query(
+        `
+        INSERT INTO rolagens (
+            usuario_id,
+            nome_chave,
+            nome,
+            rolagem
+        )
+
+        VALUES (
+            $1,
+            $2,
+            $3,
+            $4
+        )
+
+        ON CONFLICT (
+            usuario_id,
+            nome_chave
+        )
+
+        DO UPDATE SET
+            nome = EXCLUDED.nome,
+            rolagem = EXCLUDED.rolagem
+        `,
+        [
+            usuarioId,
+            nomeChave,
+            nome,
+            rolagem
+        ]
+    );
+
+}
+
+
+// ==================================================
+// BUSCAR ROLAGEM
+// ==================================================
+
+async function buscarRolagem(
+    usuarioId,
+    nome
+) {
+
+    const nomeChave =
+        nome.toLowerCase().trim();
+
+
+    const resultado =
+        await db.query(
+            `
+            SELECT
+                usuario_id,
+                nome_chave,
+                nome,
+                rolagem
+
+            FROM rolagens
+
+            WHERE usuario_id = $1
+            AND nome_chave = $2
+            `,
+            [
+                usuarioId,
+                nomeChave
+            ]
+        );
+
+
+    return resultado.rows[0];
+
+}
+
+
+// ==================================================
+// LISTAR ROLAGENS
+// ==================================================
+
+async function listarRolagens(
+    usuarioId
+) {
+
+    const resultado =
+        await db.query(
+            `
+            SELECT
+                usuario_id,
+                nome_chave,
+                nome,
+                rolagem
+
+            FROM rolagens
+
+            WHERE usuario_id = $1
+
+            ORDER BY nome
+            `,
+            [
+                usuarioId
+            ]
+        );
+
+
+    return resultado.rows;
+
+}
 
 // ==================================================
 // EXPORTS
